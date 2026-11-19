@@ -28,11 +28,11 @@ jobs:
     # No `environment:` here: it would change the OIDC subject to
     # repo:<owner>/<repo>:environment:<name>, and the IAM trust policy expects ref:refs/heads/main.
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
