@@ -6,9 +6,9 @@ _Last updated: 2026-11-21. Update this file at the end of every work session._
 
 The repository contains a **working EKS platform skeleton** (Terraform + Kubernetes + CI/CD) running a placeholder **notes API**. It was built as `eks-platform-lab` and is now being turned into **CloudCost Watch** (see `PROJECT_REQUIREMENTS.md`). The infrastructure is reused; the notes app will be replaced in Phase 1.
 
-- GitHub: https://github.com/vuongnguyen-se/eks-platform-lab (public, branch `main`)
+- GitHub: https://github.com/vuongnguyen-se/cloudcost-watch (public, renamed from `eks-platform-lab` on 2026-11-21; old URL redirects, branch `main`)
 - Local path: `C:\Users\Vuong\Downloads\eks-platform-lab`
-- Commits so far: `c908cbf` (platform skeleton), `dcbcb6b` (Actions bumped to Node 24 versions), plus this handoff docs commit
+- Commits so far: `c908cbf` (platform skeleton), `dcbcb6b` (Actions bumped to Node 24 versions), `f4355ee` (handoff docs), then the rename commit
 - **Nothing has ever been deployed to AWS.** No AWS resources exist for this project.
 
 ## 2. What exists
@@ -65,4 +65,4 @@ Terraform ≥ 1.6 (local 1.17.1) · AWS provider `>= 5.95, < 6.0` · Helm provid
 
 ## 7. Next step
 
-Start **Phase 0** in `TASKS.md` (rename and reframe the repo, AWS sign-in checks, tag activation), then **Phase 1** (cost ingestion, built and tested locally first).
+Continue **Phase 0** in `TASKS.md` from P0-02 (AWS sign-in checks, tag activation), then **Phase 1** (cost ingestion, built and tested locally first).

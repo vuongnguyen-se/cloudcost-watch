@@ -9,7 +9,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` dropped (say why)
 | Phase | Goal | Status |
 |---|---|---|
 | (pre) | EKS platform skeleton (lab): Terraform, K8s, CI, verified locally | ✅ Done (2026-11-20) |
-| 0 | Rebrand to CloudCost Watch, account checks, tag activation | Not started |
+| 0 | Rebrand to CloudCost Watch, account checks, tag activation | In progress (P0-01 done) |
 | 1 | Cost ingestion + cost API, locally | Not started |
 | 2 | Waste scanner | Not started |
 | 3 | Dashboard frontend | Not started |
@@ -23,7 +23,7 @@ Phases 1–3 are built and tested **locally at USD 0** (Docker Compose / minikub
 
 ## Phase 0: Rebrand and account checks
 
-- [ ] **P0-01** Rename the GitHub repo to `cloudcost-watch` (`gh repo rename cloudcost-watch`), update the local remote, change Terraform `project` default, ECR repo name, tags and README links (D-015).
+- [x] **P0-01** (2026-11-21: repo renamed, remote updated, Terraform `project` default, ECR repo name, tags and labels now `cloudcost-watch`) Rename the GitHub repo to `cloudcost-watch` (`gh repo rename cloudcost-watch`), update the local remote, change Terraform `project` default, ECR repo name, tags and README links (D-015).
   - Done when: `git remote -v` shows the new URL and CI is green.
 - [ ] **P0-02** Sign in to AWS on the dev machine (`aws login` or `aws sso login --profile <profile>`); record the profile name in `CURRENT_STATE.md`.
   - Done when: `aws sts get-caller-identity` returns the admin identity.

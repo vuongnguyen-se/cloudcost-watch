@@ -9,7 +9,7 @@ metadata:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/healthcheck-path: /readyz
-    alb.ingress.kubernetes.io/tags: Project=eks-platform-lab
+    alb.ingress.kubernetes.io/tags: Project=cloudcost-watch
 spec:
   ingressClassName: alb
   rules:

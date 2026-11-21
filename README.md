@@ -1,4 +1,4 @@
-# EKS Platform Lab → CloudCost Watch
+# CloudCost Watch
 
 > **This repository is becoming _CloudCost Watch_**, a FinOps platform on Amazon EKS. Start with [`CURRENT_STATE.md`](CURRENT_STATE.md) and [`PROJECT_REQUIREMENTS.md`](PROJECT_REQUIREMENTS.md); the plan is in [`TASKS.md`](TASKS.md). Coding agents: read [`PROMPT_FOR_CODING_AGENT.md`](PROMPT_FOR_CODING_AGENT.md). The text below describes the platform skeleton as it exists today.
 

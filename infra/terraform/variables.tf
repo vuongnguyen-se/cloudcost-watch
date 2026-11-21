@@ -7,7 +7,7 @@ variable "region" {
 variable "project" {
   description = "Name prefix and value of the Project cost allocation tag."
   type        = string
-  default     = "eks-platform-lab"
+  default     = "cloudcost-watch"
 }
 
 variable "environment" {

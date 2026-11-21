@@ -18,5 +18,5 @@ Each decision has an ID. To change one, add a new entry that says which one it s
 | D-012 | Environments run **on demand**, not 24/7; costs documented per hour | Always-on prod ≈ USD 275/month is too much for a portfolio | Accepted |
 | D-013 | **One Python package and one image** (`services/cloudcost`) with subcommands `api`, `ingest`, `scan`, `notify`, `migrate` | Shared models/config, one build, one scan; separate Deployments/CronJobs still scale and fail independently | Accepted |
 | D-014 | Waste prices from a **static price table** per region in config for MVP; AWS Pricing API later | Predictable, testable; Pricing API adds complexity | Accepted |
-| D-015 | Repository renamed to **`cloudcost-watch`**; Terraform `project` default becomes `cloudcost-watch` | The project is no longer a lab | Accepted (do in P0-01) |
+| D-015 | Repository renamed to **`cloudcost-watch`**; Terraform `project` default becomes `cloudcost-watch` | The project is no longer a lab | Accepted (done 2026-11-21) |
 | D-016 | Kubernetes packaging stays **Kustomize** (no Helm chart for our own app) | Already in place and simple; Helm used only for third-party add-ons | Accepted |

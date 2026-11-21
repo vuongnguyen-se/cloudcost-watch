@@ -1,6 +1,6 @@
 # Copy to terraform.tfvars (git-ignored) and fill in.
 owner        = "your-github-handle"
-github_repo  = "your-github-handle/eks-platform-lab"
+github_repo  = "your-github-handle/cloudcost-watch"
 budget_email = "you@example.com"
 
 # Lock the Kubernetes API to your own IP: curl https://checkip.amazonaws.com
