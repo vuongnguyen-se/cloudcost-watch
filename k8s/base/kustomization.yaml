@@ -9,7 +9,7 @@ resources:
   - pdb.yaml
 labels:
   - pairs:
-      app.kubernetes.io/part-of: cloudcost-watch
+      app.kubernetes.io/part-of: liveask
 images:
   - name: notes-api
     newName: notes-api

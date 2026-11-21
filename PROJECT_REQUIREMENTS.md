@@ -1,95 +1,61 @@
-# CloudCost Watch: Project Requirements
+# LiveAsk: Project Requirements
 
 ## 1. Purpose
 
-Teams that run on AWS often overspend and cannot see **who** or **what** is driving the bill. CloudCost Watch is a self-hosted FinOps platform that:
+During a class presentation, a club meeting or a small event, the audience rarely asks questions out loud, and the presenter has no quick way to run a poll. **LiveAsk** fixes that:
 
-1. imports AWS cost data every day,
-2. shows spend by service, by team/project tag and over time, with a month-end forecast,
-3. finds resources that cost money but do nothing (waste) and estimates the monthly saving,
-4. alerts when spend spikes or a budget is about to be exceeded.
+- The presenter creates a **room** and shows its QR code / 6-character code on the projector.
+- The audience opens the link on their phones (no sign-up), **asks questions**, **upvotes** the best ones and **answers polls**.
+- Everything updates **in real time** on three views: audience phones, the presenter's control page, and the projector screen.
 
-It runs on Amazon EKS and is built to production standards (HTTPS, sign-in, separate staging/prod, GitOps, monitoring, backups, runbooks).
+It is the third project on an AWS-internship CV (SoftwareOne). Its job is to show **Kubernetes on Amazon EKS with a real reason to use containers**, built in **about 3 days**.
 
-**Real use case from day one:** it analyses the developer's own AWS account, including the cost of the platform it runs on.
+### Why containers and not Lambda
 
-### Why this project (portfolio context)
+Real-time updates need **WebSocket connections that stay open** for the whole talk (30–90 minutes), from tens to hundreds of phones at once. Long-lived connections fit a container that keeps them in memory. API Gateway WebSocket APIs with Lambda are possible, but every message becomes a separate invocation and connection state must live in DynamoDB. The interview story: _"The Say Coffee site is serverless because traffic is light and bursty; LiveAsk is on EKS because it holds long-lived WebSocket connections. I pick the platform by the workload."_
 
-Built for an AWS internship application at SoftwareOne, whose cloud business includes FinOps / cost optimization, migration and managed services. It complements the other two CV projects:
+### Portfolio context
 
 | Project | Shows |
 |---|---|
-| Say Coffee | Serverless web (S3, CloudFront, Lambda, API Gateway, DynamoDB), SAM + Terraform, GitHub OIDC CI/CD |
+| Say Coffee | Serverless web (S3, CloudFront, Lambda, API Gateway, DynamoDB), SAM + Terraform, GitHub OIDC |
 | CloudDocs-AI | AI on AWS: Bedrock Knowledge Bases (RAG), Cognito, CDK |
-| **CloudCost Watch** | Containers and Kubernetes (EKS), networking, data jobs, observability, FinOps |
+| **LiveAsk** | Containers and Kubernetes on EKS: WebSockets, multi-pod fan-out, autoscaling, zero-downtime updates, VPC networking |
 
 ## 2. Users
 
-| Persona | Needs |
-|---|---|
-| **Cloud owner / FinOps lead** | Monthly spend, forecast, which services and teams cost the most, savings list |
-| **Engineer on a team** | Their team's spend (by `Project`/`Team` tag), waste in their resources |
-| **Platform admin** | Health of the jobs, alert channels, users |
+| Role | How they get in | Can do |
+|---|---|---|
+| **Presenter (host)** | Creates a room; gets a secret host link | Open/close polls, mark questions answered, hide questions, close the room |
+| **Audience** | Room link or 6-character code; optional display name | Ask questions, upvote (once each), vote in polls (once each) |
+| **Screen** | Screen link (read-only) on the projector | Shows top questions and live poll results |
 
-MVP has a single account and a small set of admin-created users (Cognito).
+No accounts in the MVP. Rooms expire after 24 hours.
 
 ## 3. Functional requirements
 
-### FR-1 Cost ingestion
-- FR-1.1 A scheduled job imports **daily unblended cost** for the last N days (default 35) from the Cost Explorer API, grouped by `SERVICE`, and separately by the cost allocation tags `Project` and `Environment`.
-- FR-1.2 The job is idempotent (upsert) and re-imports recent days, because AWS revises costs for up to ~3 days.
-- FR-1.3 The job stores the month-end forecast (`GetCostForecast`).
-- FR-1.4 Every run is recorded (start, end, status, rows, error) and visible in the UI.
-- FR-1.5 (Later) Switch or add line-item detail from **CUR 2.0 Data Exports** (Parquet in S3).
-
-### FR-2 Cost views
-- FR-2.1 Overview: month-to-date, forecast, last month, % change, budget status.
-- FR-2.2 Daily cost chart for a date range, grouped by service or by a tag.
-- FR-2.3 Top 10 services for a month.
-
-### FR-3 Waste finder (scanner job)
-Rules for MVP, each producing a **finding** with resource ID, region, details and estimated monthly saving:
-
-| Rule ID | Detects | Saving estimate |
-|---|---|---|
-| `ebs-unattached` | EBS volumes in `available` state | size GB × price per GB-month for its type |
-| `eip-unassociated` | Elastic IPs not attached | public IPv4 hourly price × 730 |
-| `snapshot-old` | Own EBS snapshots older than 90 days | size GB × snapshot price per GB-month |
-| `alb-idle` | Load balancers with 0 requests in 7 days | ALB hourly price × 730 |
-| `ec2-low-cpu` | Running EC2 with max CPU < 10% for 14 days | "consider a smaller size" (no fixed number in MVP) |
-| `ec2-stopped-with-ebs` | Instances stopped > 14 days that still have EBS volumes | attached volume cost |
-
-- FR-3.1 Findings keep `first_seen`/`last_seen`; a finding not seen in the latest scan becomes `resolved`.
-- FR-3.2 A user can mark a finding `ignored` with a reason.
-- FR-3.3 Prices come from a static table per region in config (MVP); AWS Pricing API later.
-
-### FR-4 Alerts
-- FR-4.1 **Spike:** yesterday's cost > mean + 3σ of the previous 14 days **and** more than USD 1 above the mean.
-- FR-4.2 **Budget:** forecast passes 80% / 100% of the monthly budget set in config.
-- FR-4.3 **New waste:** new findings with total saving > USD 5.
-- FR-4.4 Channels: email (Amazon SES) and optional Slack webhook. One alert per event (deduplicated by fingerprint).
-
-### FR-5 Access
-- FR-5.1 Dashboard and API only reachable over HTTPS, after Cognito sign-in (ALB authentication).
-- FR-5.2 Health endpoints are open for the load balancer only.
+- **FR-1 Rooms:** create a room with a title. You get a 6-character code (no ambiguous characters such as 0/O, 1/I), an audience URL, a screen URL and a host URL. The host URL carries a secret token. Rooms expire 24 h after creation; a nightly job deletes expired rooms and their data.
+- **FR-2 Questions:** audience posts a question (1–280 chars, optional name ≤ 40 chars). It appears for everyone within 1 s. The list is sorted by votes, then newest first.
+- **FR-3 Upvotes:** one upvote per question per audience device (anonymous device ID stored in the browser). Tapping again removes the vote.
+- **FR-4 Moderation:** host can mark a question `answered` or `hidden`. Hidden questions disappear for audience and screen.
+- **FR-5 Polls:** host creates a poll (question + 2–6 options), opens it, closes it. One vote per device. Live result bars on all views.
+- **FR-6 Real time:** every change (new question, vote count, status, poll) is pushed over WebSocket to all clients in the room, **no matter which pod they are connected to**.
+- **FR-7 Reconnect:** if the connection drops (pod restart, network), the client reconnects automatically with backoff and reloads the room state.
+- **FR-8 Limits:** max 5 questions per device per minute; max 300 connections per room (configurable).
 
 ## 4. Non-functional requirements
 
 | ID | Requirement |
 |---|---|
-| NFR-1 | Availability target (SLO) for the API in prod: 99.5% of requests succeed over 30 days |
-| NFR-2 | Overview page loads in < 1 s p95 (data is pre-aggregated in Postgres) |
-| NFR-3 | All infrastructure in Terraform; all app deploys through Git (Argo CD) |
-| NFR-4 | No long-lived AWS keys anywhere; least-privilege IAM per workload |
-| NFR-5 | Data encrypted at rest (RDS, S3) and in transit (TLS) |
-| NFR-6 | Staging and prod are separate (state, namespaces, database, domain) |
-| NFR-7 | Platform cost is documented per hour and per month; budget alerts on the account |
-| NFR-8 | Every incident type has a runbook in `docs/runbooks/` |
+| NFR-1 | Real-time delivery < 1 s across pods for 200 connected clients |
+| NFR-2 | **Zero-downtime deploys:** during a rolling update, no data is lost and clients reconnect within ~5 s |
+| NFR-3 | Runs with ≥ 2 replicas; survives losing one pod or one node (PDB, spread across AZs) |
+| NFR-4 | Autoscales on load (HPA), demonstrated with a load test |
+| NFR-5 | Same Kubernetes manifests run on **minikube** (free) and **EKS** (Kustomize overlays) |
+| NFR-6 | All AWS infrastructure in Terraform; no long-lived AWS keys (GitHub OIDC) |
+| NFR-7 | One AWS session ≈ 3–4 hours ≈ USD 1, then everything is destroyed |
+| NFR-8 | No personal data collected beyond an optional display name |
 
-## 5. Out of scope (for now)
+## 5. Out of scope (roadmap ideas for the README)
 
-- Multiple AWS accounts / AWS Organizations (design for it, build for one account)
-- Billing for customers, multi-tenant SaaS
-- Automatically deleting wasted resources (we only report)
-- Reserved Instance / Savings Plan purchase advice
-- Mobile app
+HTTPS on a custom domain (if time allows on day 3), Cognito sign-in for presenters, NetworkPolicies (needs Calico on minikube), Argo CD (GitOps), Prometheus/Grafana and autoscaling on connection count (KEDA), Redis pub/sub instead of Postgres `LISTEN/NOTIFY`, React frontend, separate prod environment, WAF.

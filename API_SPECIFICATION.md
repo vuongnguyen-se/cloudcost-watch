@@ -1,80 +1,65 @@
 # API Specification
 
-Base path `/api`. JSON. Behind the ALB, every request (except health) arrives already signed in through Cognito; the ALB adds `x-amzn-oidc-identity` and `x-amzn-oidc-data` headers. The API **must verify** the `x-amzn-oidc-data` JWT signature (ALB public key for the region) and never trust the headers blindly.
+One FastAPI service serves the API, the WebSocket endpoint and the static pages. JSON everywhere. Errors: `{"error": {"code": "string", "message": "string"}}`.
 
-Errors use one shape: `{"error": {"code": "string", "message": "string"}}`.
+**Identity**
+- Audience devices send `X-Device-Id: <uuid>`, a random UUID the browser creates once and keeps in `localStorage`.
+- Host-only calls send `Authorization: Bearer <host_token>`. The server compares `sha256(token)` with `room.host_token_hash` using a constant-time compare.
 
-## Health (no auth)
+## Health (for Kubernetes probes)
 
-| Method | Path | Response |
+| Method | Path | Meaning |
 |---|---|---|
-| GET | `/api/healthz` | `{"status":"ok"}`: process alive, no DB call |
-| GET | `/api/readyz` | `{"status":"ready"}` or 503: DB reachable and migrations at head |
+| GET | `/healthz` | Liveness: process is up. Never touches the DB |
+| GET | `/readyz` | Readiness: DB reachable **and** the LISTEN connection is alive; 503 otherwise, and 503 while shutting down |
 
-## Costs
+## Pages (static HTML + JS)
 
-### `GET /api/costs/summary?month=YYYY-MM`
-Default month: current (UTC).
+| Path | View |
+|---|---|
+| `/` | Create a room / join by code |
+| `/r/{code}` | Audience (phone) |
+| `/host/{code}#t=<token>` | Presenter controls. The token is in the URL **fragment**, so it is never sent to the server or written to load balancer logs |
+| `/screen/{code}` | Projector view: QR code, top questions, live poll |
+
+## Rooms
+
+`POST /api/rooms` with body `{"title": "Cloud 101 – week 5"}` → `201`
 ```json
-{
-  "month": "2026-11",
-  "month_to_date_usd": "42.1830",
-  "forecast_usd": "61.0200",
-  "last_month_usd": "55.4000",
-  "change_vs_last_month_pct": 10.1,
-  "budget_usd": "60.00",
-  "budget_status": "forecast_over",
-  "data_as_of": "2026-11-20",
-  "estimated": true
-}
+{"code": "K7PX4M", "title": "Cloud 101 – week 5", "host_token": "…43 chars…",
+ "audience_url": "/r/K7PX4M", "screen_url": "/screen/K7PX4M", "host_url": "/host/K7PX4M#t=…",
+ "expires_at": "2026-11-23T10:00:00Z"}
 ```
-`budget_status`: `ok` | `forecast_over_80` | `forecast_over` | `actual_over`.
+The `host_token` is returned **only once**.
 
-### `GET /api/costs/daily?from=YYYY-MM-DD&to=YYYY-MM-DD&group_by=service|tag:<Key>`
-Max range 93 days. Response:
-```json
-{
-  "group_by": "service",
-  "days": ["2026-11-01", "2026-11-02"],
-  "series": [
-    {"key": "Amazon Elastic Kubernetes Service", "amounts_usd": ["2.4000", "2.4000"]},
-    {"key": "Other", "amounts_usd": ["0.3100", "0.2900"]}
-  ],
-  "total_usd": ["2.7100", "2.6900"]
-}
-```
-Top 8 keys by total; the rest are summed into `Other`.
+`GET /api/rooms/{code}` → room snapshot: `{"code","title","closed","questions":[…],"polls":[…],"my_votes":{"questions":[ids],"polls":{"<poll_id>":option}}}`. `my_votes` uses `X-Device-Id`. Hidden questions are left out unless the caller is the host.
 
-### `GET /api/costs/top-services?month=YYYY-MM&limit=10`
-`[{"service": "...", "amount_usd": "...", "share_pct": 31.2}]`
+`POST /api/rooms/{code}/close` (host) → `204`, and sends `room.closed`.
 
-## Findings
+## Questions
 
-| Method | Path | Notes |
-|---|---|---|
-| GET | `/api/findings?status=open&rule_id=&limit=50&cursor=` | Paginated list, newest `last_seen` first |
-| GET | `/api/findings/summary` | `{"open": 7, "est_monthly_saving_usd": "24.9000", "by_rule": [{"rule_id": "...", "count": 3, "saving_usd": "..."}]}` |
-| PATCH | `/api/findings/{id}` | Body `{"status": "ignored", "reason": "kept for DR test"}` or `{"status": "open"}`. 422 on other transitions |
+| Method | Path | Who | Body / result |
+|---|---|---|---|
+| POST | `/api/rooms/{code}/questions` | audience | `{"text": "...", "author_name": "Lan"}` → `201` question. `429` if over 5/min per device |
+| POST | `/api/questions/{id}/vote` | audience | toggles this device's vote → `{"id": 42, "votes": 7, "voted": true}` |
+| PATCH | `/api/questions/{id}` | host | `{"status": "answered" \| "hidden" \| "open"}` |
 
-Finding object:
-```json
-{
-  "id": "uuid",
-  "rule_id": "ebs-unattached",
-  "resource_id": "vol-0abc",
-  "region": "ap-southeast-1",
-  "details": {"size_gb": 100, "volume_type": "gp3", "age_days": 41},
-  "est_monthly_saving_usd": "9.6000",
-  "status": "open",
-  "first_seen": "2026-11-10T02:30:11Z",
-  "last_seen": "2026-11-20T02:30:09Z"
-}
-```
+Question object: `{"id": 42, "text": "...", "author_name": "Lan", "votes": 7, "status": "open", "created_at": "..."}`.
 
-## Jobs
+## Polls
 
-| Method | Path | Notes |
-|---|---|---|
-| GET | `/api/jobs/runs?job=ingest&limit=20` | Latest runs with status and errors |
+| Method | Path | Who | Body / result |
+|---|---|---|---|
+| POST | `/api/rooms/{code}/polls` | host | `{"question": "Which AWS service next?", "options": ["EKS", "ECS", "Lambda"]}` → `201` (status `draft`) |
+| PATCH | `/api/polls/{id}` | host | `{"status": "open" \| "closed"}` |
+| POST | `/api/polls/{id}/vote` | audience | `{"option_index": 1}`; only while `open`; changing the vote is allowed |
 
-Triggering jobs from the UI is out of scope for MVP. Run manually with `kubectl -n <ns> create job --from=cronjob/ingest ingest-manual-$(date +%s)`.
+Poll object: `{"id": 3, "question": "...", "options": ["EKS","ECS","Lambda"], "status": "open", "counts": [12, 5, 3], "total": 20}`.
+
+## WebSocket
+
+`GET /ws/rooms/{code}` (upgrade). Optional query `role=screen|host|audience`, used for logging only.
+
+- **Server → client** messages: `{"type": "question.created", "data": {question}}`, `question.updated`, `poll.created`, `poll.updated`, `room.closed`, and `{"type": "hello", "data": {"pod": "<hostname>"}}` on connect. The UI shows "connected to pod …", which makes the multi-pod demo visible.
+- **Client → server:** only `{"type": "ping"}` every 25 s; the server replies `pong`. All writes go through the REST endpoints above, which keeps WebSocket handling simple.
+- On shutdown the server closes sockets with code **1012** (service restart). Clients reconnect with backoff (0.5 s, 1 s, 2 s … max 10 s) and call `GET /api/rooms/{code}` to resync.

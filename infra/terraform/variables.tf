@@ -7,7 +7,7 @@ variable "region" {
 variable "project" {
   description = "Name prefix and value of the Project cost allocation tag."
   type        = string
-  default     = "cloudcost-watch"
+  default     = "liveask"
 }
 
 variable "environment" {

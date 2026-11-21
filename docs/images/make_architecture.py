@@ -1,4 +1,4 @@
-"""Generates docs/images/architecture.svg (CloudCost Watch target architecture).
+"""Generates docs/images/architecture.svg (LiveAsk architecture on AWS).
 
 Run:  python docs/images/make_architecture.py
 Edit the coordinates below and re-run; the SVG is plain and diff-friendly.
@@ -6,7 +6,7 @@ Edit the coordinates below and re-run; the SVG is plain and diff-friendly.
 
 from pathlib import Path
 
-W, H = 1560, 1010
+W, H = 1440, 900
 INK = "#232F3E"
 MUTED = "#5F6B7A"
 
@@ -15,9 +15,12 @@ NET = "#8C4FFF"
 SEC = "#DD344C"
 CMP = "#ED7100"
 DB = "#C925D1"
-MGMT = "#E7157B"
 FIN = "#7AA116"
 K8S = "#326CE5"
+
+REQ = "#0972D3"   # client traffic
+DATA = "#E07941"  # database traffic and NOTIFY
+OPS = "#3F8624"   # delivery
 
 out: list[str] = []
 
@@ -30,11 +33,10 @@ def esc(t: str) -> str:
     return t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def group(x, y, w, h, label, stroke, fill="none", dash=None, label_fill=None):
+def group(x, y, w, h, label, stroke, fill="none", dash=None):
     d = f' stroke-dasharray="{dash}"' if dash else ""
     add(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="8" fill="{fill}" stroke="{stroke}" stroke-width="1.6"{d}/>')
-    lf = label_fill or stroke
-    add(f'<rect x="{x}" y="{y}" width="{len(label) * 7.4 + 22}" height="24" rx="6" fill="{lf}"/>')
+    add(f'<rect x="{x}" y="{y}" width="{len(label) * 7.4 + 22}" height="24" rx="6" fill="{stroke}"/>')
     add(f'<text x="{x + 11}" y="{y + 16.5}" class="glabel">{esc(label)}</text>')
 
 
@@ -74,127 +76,108 @@ def step(x, y, n, color):
     add(f'<text x="{x}" y="{y + 4.5}" class="step">{n}</text>')
 
 
-REQ = "#0972D3"   # request path
-DATA = "#E07941"  # data / AWS API calls
-OPS = "#3F8624"   # delivery
-
 # ---------------------------------------------------------------- header
 add(f'<rect width="{W}" height="{H}" rx="18" fill="#FFFFFF"/>')
-add(f'<text x="40" y="48" class="title">CloudCost Watch</text>')
-add(f'<text x="40" y="72" class="subtitle">Target architecture · FinOps platform on Amazon EKS · ap-southeast-1</text>')
+add('<text x="40" y="48" class="title">LiveAsk</text>')
+add('<text x="40" y="72" class="subtitle">Real-time Q&amp;A and polls for presentations · Amazon EKS · ap-southeast-1</text>')
 
 # ---------------------------------------------------------------- groups
-group(200, 92, 1220, 838, "AWS Cloud", INK)
-group(220, 132, 1040, 778, "Region ap-southeast-1", "#00A4A6", dash="7 5")
-group(1272, 300, 136, 172, "Global", MUTED, dash="7 5")
-group(240, 272, 830, 578, "VPC 10.20.0.0/16 · 2 AZs", NET, fill="#FBF9FF")
-group(258, 312, 174, 520, "Public subnets", FIN, fill="#F3F8EA")
-group(450, 312, 440, 520, "Private subnets", "#147EBA", fill="#EEF6FC")
-group(470, 340, 400, 464, "Amazon EKS cluster", CMP, fill="#FFFFFF")
-group(908, 312, 146, 290, "Database subnets", DB, fill="#FBF1FC")
+group(200, 92, 1210, 738, "AWS Cloud", INK)
+group(220, 132, 1170, 678, "Region ap-southeast-1", "#00A4A6", dash="7 5")
+group(240, 172, 900, 618, "VPC 10.20.0.0/16 · 2 AZs", NET, fill="#FBF9FF")
+group(258, 212, 174, 558, "Public subnets", FIN, fill="#F3F8EA")
+group(450, 212, 480, 558, "Private subnets", "#147EBA", fill="#EEF6FC")
+group(470, 252, 440, 498, "Amazon EKS cluster · Spot nodes in 2 AZs", CMP, fill="#FFFFFF")
+group(488, 292, 404, 290, "namespace: liveask", K8S, fill="#F5F8FE", dash="5 4")
+group(950, 212, 172, 330, "Database subnets", DB, fill="#FBF1FC")
 
-# ---------------------------------------------------------------- arrows (drawn under tiles)
-# request path
-path("M126,200 H262", REQ)
-path("M316,200 H382", REQ)
-path("M410,266 V430 H374", REQ)
-path("M372,422 H512", REQ)
-path("M374,436 Q440,436 440,410 V392 Q440,384 452,384 H700 V392", REQ)
-path("M728,420 H952", REQ)
-# jobs -> database (read / write)
-for x in (540, 660, 780):
-    path(f"M{x},526 V512", DATA, arrow=False)
-path("M540,512 H890 V428 H952", DATA)
-# jobs -> AWS APIs trunk
-for x in (540, 660, 780):
-    path(f"M{x},606 V618", DATA, arrow=False)
-path("M540,618 H1096", DATA, arrow=False)
-path("M1096,300 V646", DATA, arrow=False)
-path("M1096,312 H1130", DATA)
-path("M1096,422 H1130", DATA)
-path("M1096,532 H1130", DATA)
-path("M1096,646 H1224 Q1236,646 1236,634 V410 Q1236,398 1248,398 H1310", DATA)
-path("M1096,492 Q1110,492 1150,492 H1420 Q1430,492 1430,482 V458", DATA, dashed=True)
+# ---------------------------------------------------------------- arrows (under tiles)
+# clients -> ALB
+path("M126,250 H230 V380 H316", REQ)
+path("M126,380 H316", REQ)
+path("M126,510 H230 V380", REQ, arrow=False)
+# ALB -> pods (target-type ip)
+path("M372,380 H520 V340 H532", REQ)
+path("M520,380 V460 H532", REQ)
+# pods / cronjob -> RDS
+path("M588,340 H640 V395", DATA, arrow=False)
+path("M588,450 H640 V395", DATA, arrow=False)
+path("M740,484 V395", DATA, arrow=False)
+path("M640,395 H1006", DATA)
+# NOTIFY back to every pod
+path("M1022,352 C1018,268 700,262 590,318", DATA, dashed=True)
+path("M1010,408 C900,470 690,474 590,474", DATA, dashed=True)
 # delivery
-path("M126,790 H170 V880 H1160 V812", OPS)
-path("M580,880 V776", OPS, dashed=True)
-path("M1130,740 H874", CMP, dashed=True)
+path("M126,700 H170 V796 H1250 V752", OPS)
+path("M690,796 V754", OPS, dashed=True)
+path("M1224,690 H914", CMP, dashed=True)
 
 # ---------------------------------------------------------------- outside
-tile(100, 200, "#545B64", "user", "Users", "browser", round_=True)
-tile(100, 790, "#24292F", "GitHub", "GitHub", "repo + Actions")
-tile(1460, 432, "#4A154B", "Slack", "Slack", "optional")
-
-# edge services (regional / global, outside the VPC)
-tile(290, 200, NET, "R53", "Route 53", "cost.vuongdomain.click")
-tile(410, 200, SEC, "WAF", "AWS WAF", "managed rules")
-tile(540, 200, SEC, "ACM", "ACM", "TLS certificate")
-tile(660, 200, SEC, "IdP", "Cognito", "sign-in on ALB")
+tile(100, 250, "#545B64", "aud", "Audience", "phones · QR code", round_=True)
+tile(100, 380, "#545B64", "host", "Presenter", "secret host link", round_=True)
+tile(100, 510, "#545B64", "TV", "Projector", "screen view", round_=True)
+tile(100, 700, "#24292F", "GitHub", "GitHub", "repo + Actions")
 
 # public subnet
-tile(345, 430, NET, "ALB", "Application LB", "HTTPS · Cognito auth")
-tile(345, 700, NET, "NAT", "NAT gateway", "egress to AWS APIs")
+tile(345, 380, NET, "ALB", "Application LB", "HTTP + WebSocket")
+add('<text x="345" y="454" class="tsub">idle timeout 3600 s</text>')
+tile(345, 660, NET, "NAT", "NAT gateway", "egress")
 
-# EKS workloads
-tile(540, 420, K8S, "web", "frontend", "nginx · React")
-tile(700, 420, K8S, "api", "api", "FastAPI · HPA 2–6")
-tile(540, 552, K8S, "job", "ingest", "CronJob · daily")
-tile(660, 552, K8S, "job", "scan", "CronJob · daily")
-tile(780, 552, K8S, "job", "notify", "CronJob · hourly")
-add('<text x="490" y="660" class="section">Platform add-ons (Helm)</text>')
-pill(490, 674, 176, "LB Controller", CMP)
-pill(676, 674, 176, "External Secrets", SEC)
-pill(490, 714, 176, "Argo CD (GitOps)", OPS)
-pill(676, 714, 176, "Prometheus · Grafana", MGMT)
-pill(490, 754, 176, "metrics-server", K8S)
-pill(676, 754, 176, "Pod Identity agent", K8S)
+# namespace
+tile(560, 340, K8S, "pod", "liveask pod", "API · WS hub")
+tile(560, 460, K8S, "pod", "liveask pod", "+ initContainer")
+tile(740, 510, K8S, "cron", "cleanup", "CronJob · nightly")
+tile(850, 510, K8S, "cfg", "ConfigMap", "+ Secret")
+pill(758, 418, 128, "HPA 2–6 · PDB", K8S)
+
+# add-ons
+add('<text x="490" y="608" class="section">Add-ons (Helm, via Terraform)</text>')
+pill(490, 620, 196, "AWS LB Controller", CMP)
+pill(696, 620, 196, "metrics-server", K8S)
+pill(490, 656, 196, "Deployment · Service", K8S)
+pill(696, 656, 196, "Ingress (ALB class)", K8S)
+pill(490, 692, 196, "Rolling update · preStop", K8S)
+pill(696, 692, 196, "Probes · non-root", K8S)
 
 # database
-tile(980, 420, DB, "RDS", "PostgreSQL 17", "Multi-AZ in prod")
-add('<text x="981" y="500" class="tsub">encrypted · PITR</text>')
-add('<text x="981" y="515" class="tsub">no internet route</text>')
+tile(1036, 380, DB, "RDS", "PostgreSQL 17", "LISTEN / NOTIFY")
+add('<text x="1036" y="462" class="tsub">encrypted · private</text>')
+add('<text x="1036" y="477" class="tsub">password in Secrets Mgr</text>')
 
 # regional services
-tile(1160, 312, SEC, "SM", "Secrets Manager", "DB creds · webhook")
-tile(1160, 422, MGMT, "SES", "Amazon SES", "email alerts")
-tile(1160, 532, MGMT, "CW", "EC2 · ELB · CW", "scanned (read-only)")
-tile(1160, 740, CMP, "ECR", "Amazon ECR", "immutable SHA tags")
-tile(1340, 398, FIN, "CE", "Cost Explorer", "API (us-east-1)")
+tile(1250, 290, SEC, "SM", "Secrets Manager", "RDS password")
+tile(1250, 470, FIN, "$", "AWS Budgets", "email alerts")
+tile(1250, 690, CMP, "ECR", "Amazon ECR", "immutable SHA tags")
 
-# ---------------------------------------------------------------- labels on arrows
-tag(194, 200, "HTTPS", REQ)
-tag(470, 422, "/", REQ)
-tag(600, 384, "/api", REQ)
-tag(840, 420, "SQL · TLS", REQ)
-tag(820, 512, "upsert", DATA)
-tag(960, 618, "AWS API calls · Pod Identity · via NAT", DATA)
-tag(1290, 492, "Slack webhook", DATA)
-tag(1000, 740, "pull images", CMP)
-tag(380, 880, "git push → CI → OIDC → push image", OPS)
-tag(690, 862, "Argo CD syncs manifests", OPS)
+# ---------------------------------------------------------------- labels
+tag(232, 450, "HTTP + WebSocket", REQ)
+tag(452, 380, "/ · /api · /ws", REQ)
+tag(830, 395, "SQL + pg_notify (same transaction)", DATA)
+tag(820, 268, "NOTIFY → every pod", DATA)
+tag(1060, 690, "pull images", CMP)
+tag(420, 796, "push → CI → OIDC → ECR", OPS)
+tag(820, 776, "kubectl apply -k", OPS)
 
-step(150, 182, "1", REQ)
-step(426, 300, "2", REQ)
-step(470, 400, "3", REQ)
-step(800, 400, "4", REQ)
-step(600, 500, "A", DATA)
-step(1096, 666, "B", DATA)
-step(230, 862, "C", OPS)
+step(160, 380, "1", REQ)
+step(400, 356, "2", REQ)
+step(950, 395, "3", DATA)
+step(1004, 326, "4", DATA)
 
 # ---------------------------------------------------------------- legend
-ly = 966
-add(f'<text x="40" y="{ly}" class="legend-h">Flows</text>')
+ly = 868
+add(f'<text x="40" y="{ly}" class="legend-h">Flow</text>')
 legend = [
-    (REQ, False, "1–4  Request: browser → Route 53 → WAF → ALB (TLS + Cognito) → pods → PostgreSQL"),
-    (DATA, False, "A–B  Data jobs: import costs, scan for waste, send alerts"),
-    (OPS, False, "C  Delivery: GitHub Actions → ECR, Argo CD deploys from git"),
+    (REQ, False, "1–2  Clients → ALB → any liveask pod"),
+    (DATA, False, "3  Write to PostgreSQL + pg_notify"),
+    (DATA, True, "4  NOTIFY fans out to every pod → its WebSocket clients"),
+    (OPS, False, "Delivery: GitHub Actions → ECR → EKS"),
 ]
-x = 100
+x = 90
 for color, dashed, text in legend:
     da = ' stroke-dasharray="6 5"' if dashed else ""
-    add(f'<path d="M{x},{ly - 4} H{x + 34}" stroke="{color}" stroke-width="2.4"{da} marker-end="url(#a-{color.strip("#")})"/>')
-    add(f'<text x="{x + 44}" y="{ly}" class="legend">{esc(text)}</text>')
-    x += 44 + len(text) * 6.55 + 40
+    add(f'<path d="M{x},{ly - 4} H{x + 30}" stroke="{color}" stroke-width="2.4"{da} marker-end="url(#a-{color.strip("#")})"/>')
+    add(f'<text x="{x + 38}" y="{ly}" class="legend">{esc(text)}</text>')
+    x += 38 + len(text) * 6.4 + 34
 
 # ---------------------------------------------------------------- assemble
 colors = {REQ, DATA, OPS, CMP, INK}
@@ -220,8 +203,8 @@ text {{ font-family: 'Amazon Ember', 'Segoe UI', Helvetica, Arial, sans-serif; }
 """
 svg = (
     f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" '
-    f'role="img" aria-label="CloudCost Watch target architecture on AWS">\n'
-    f"<title>CloudCost Watch target architecture</title>\n"
+    f'role="img" aria-label="LiveAsk architecture on AWS">\n'
+    f"<title>LiveAsk architecture on AWS</title>\n"
     f"<defs><style>{style}</style>{markers}</defs>\n" + "\n".join(out) + "\n</svg>\n"
 )
 target = Path(__file__).with_name("architecture.svg")

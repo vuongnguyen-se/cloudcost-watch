@@ -1,88 +1,72 @@
 # Database Design (PostgreSQL 17)
 
-Managed with **Alembic** migrations (`services/cloudcost/src/cloudcost/db/alembic/`). Money is `NUMERIC(14,4)` in USD. Timestamps are `TIMESTAMPTZ` in UTC. Dates of usage are `DATE` (UTC, as Cost Explorer reports them).
+Locally: PostgreSQL as a **StatefulSet** on minikube (or the Compose service). On AWS: **RDS PostgreSQL** (already in Terraform).
+
+Schema is plain SQL in `app/liveask/schema.sql`, applied by `python -m liveask.migrate` (run as an **initContainer**). The migrate command takes a Postgres **advisory lock** (`pg_advisory_lock(4242)`) so that two pods starting at the same time do not race. Every statement is idempotent (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`).
 
 ## Tables
 
-### `cost_daily_service`
-Daily cost per AWS service. Source: `GetCostAndUsage`, granularity `DAILY`, metric `UnblendedCost`, group by `DIMENSION SERVICE`.
+```sql
+CREATE TABLE IF NOT EXISTS room (
+  id              BIGSERIAL PRIMARY KEY,
+  code            CHAR(6) NOT NULL UNIQUE,         -- e.g. K7PX4M
+  title           VARCHAR(120) NOT NULL,
+  host_token_hash CHAR(64) NOT NULL,               -- sha256 hex; the token itself is never stored
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  expires_at      TIMESTAMPTZ NOT NULL DEFAULT now() + interval '24 hours',
+  closed_at       TIMESTAMPTZ
+);
 
-| Column | Type | Notes |
-|---|---|---|
-| `usage_date` | DATE | PK part |
-| `account_id` | VARCHAR(12) | PK part (one account in MVP, ready for more) |
-| `service` | TEXT | PK part, e.g. `Amazon Elastic Compute Cloud - Compute` |
-| `amount_usd` | NUMERIC(14,4) | |
-| `estimated` | BOOLEAN | Cost Explorer's `Estimated` flag (recent days change) |
-| `updated_at` | TIMESTAMPTZ | last upsert |
+CREATE TABLE IF NOT EXISTS question (
+  id          BIGSERIAL PRIMARY KEY,
+  room_id     BIGINT NOT NULL REFERENCES room(id) ON DELETE CASCADE,
+  text        VARCHAR(280) NOT NULL,
+  author_name VARCHAR(40),
+  device_id   UUID NOT NULL,
+  status      VARCHAR(10) NOT NULL DEFAULT 'open' CHECK (status IN ('open','answered','hidden')),
+  votes       INTEGER NOT NULL DEFAULT 0,          -- counter, updated in the same transaction as question_vote
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS question_room_idx ON question (room_id, votes DESC, created_at DESC);
 
-PK `(usage_date, account_id, service)`. Index `(usage_date)`.
+CREATE TABLE IF NOT EXISTS question_vote (
+  question_id BIGINT NOT NULL REFERENCES question(id) ON DELETE CASCADE,
+  device_id   UUID NOT NULL,
+  PRIMARY KEY (question_id, device_id)             -- one vote per device
+);
 
-### `cost_daily_tag`
-Daily cost per value of one cost allocation tag. Same source, group by `TAG <key>`.
+CREATE TABLE IF NOT EXISTS poll (
+  id         BIGSERIAL PRIMARY KEY,
+  room_id    BIGINT NOT NULL REFERENCES room(id) ON DELETE CASCADE,
+  question   VARCHAR(200) NOT NULL,
+  options    JSONB NOT NULL,                       -- ["Yes","No","Maybe"], 2..6 items
+  status     VARCHAR(10) NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','open','closed')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
 
-| Column | Type | Notes |
-|---|---|---|
-| `usage_date` | DATE | PK part |
-| `account_id` | VARCHAR(12) | PK part |
-| `tag_key` | TEXT | PK part, e.g. `Project` |
-| `tag_value` | TEXT | PK part; empty string = untagged |
-| `amount_usd` | NUMERIC(14,4) | |
-| `estimated` | BOOLEAN | |
-| `updated_at` | TIMESTAMPTZ | |
+CREATE TABLE IF NOT EXISTS poll_vote (
+  poll_id      BIGINT NOT NULL REFERENCES poll(id) ON DELETE CASCADE,
+  device_id    UUID NOT NULL,
+  option_index SMALLINT NOT NULL,
+  PRIMARY KEY (poll_id, device_id)                 -- one vote per device; changing vote = UPDATE
+);
+```
 
-### `cost_forecast`
-| Column | Type | Notes |
-|---|---|---|
-| `month` | DATE | PK part; first day of month |
-| `account_id` | VARCHAR(12) | PK part |
-| `amount_usd` | NUMERIC(14,4) | forecast of the whole month |
-| `lower_usd`, `upper_usd` | NUMERIC(14,4) | prediction interval |
-| `generated_at` | TIMESTAMPTZ | |
+## Real-time fan-out with `LISTEN/NOTIFY`
 
-### `finding`
-| Column | Type | Notes |
-|---|---|---|
-| `id` | UUID | PK |
-| `rule_id` | TEXT | e.g. `ebs-unattached` |
-| `resource_id` | TEXT | e.g. `vol-0abc...` |
-| `resource_arn` | TEXT | nullable |
-| `region` | TEXT | |
-| `details` | JSONB | rule-specific (size, type, age, metrics) |
-| `est_monthly_saving_usd` | NUMERIC(14,4) | nullable (e.g. `ec2-low-cpu`) |
-| `status` | TEXT | `open` / `resolved` / `ignored` |
-| `ignored_reason` | TEXT | nullable |
-| `first_seen`, `last_seen` | TIMESTAMPTZ | |
-| `resolved_at` | TIMESTAMPTZ | nullable |
+Every write that changes what clients see ends with, **in the same transaction**:
 
-Unique `(rule_id, resource_id)`. Index `(status)`. A scan upserts every finding it sees (updates `last_seen`); open findings not seen by a successful scan become `resolved`. `ignored` stays ignored.
+```sql
+SELECT pg_notify('liveask_events', '{"room":"K7PX4M","type":"question.updated","id":42}');
+```
 
-### `alert`
-| Column | Type | Notes |
-|---|---|---|
-| `id` | UUID | PK |
-| `kind` | TEXT | `cost-spike` / `budget` / `new-waste` |
-| `fingerprint` | TEXT | unique; e.g. `cost-spike:2026-11-20`, `budget:2026-11:80` |
-| `payload` | JSONB | what was sent |
-| `channels` | TEXT[] | `email`, `slack` |
-| `sent_at` | TIMESTAMPTZ | |
+- Each pod keeps **one** dedicated connection that runs `LISTEN liveask_events`.
+- When a notification arrives, the pod loads the changed object and sends it to **its own** WebSocket clients in that room.
+- Postgres delivers notifications only after the transaction commits, so clients never see data that was rolled back.
+- The payload limit is 8000 bytes, so events carry only type and IDs; the pod reads the object from the DB.
 
-The unique `fingerprint` is what stops duplicate alerts.
+Event types: `question.created`, `question.updated` (votes or status), `poll.created`, `poll.updated` (status or results), `room.closed`.
 
-### `job_run`
-| Column | Type | Notes |
-|---|---|---|
-| `id` | UUID | PK |
-| `job` | TEXT | `ingest` / `scan` / `notify` |
-| `started_at`, `finished_at` | TIMESTAMPTZ | |
-| `status` | TEXT | `running` / `succeeded` / `failed` |
-| `rows_written` | INTEGER | |
-| `error` | TEXT | nullable, truncated |
+## Cleanup
 
-Jobs also expose metrics (`cloudcost_job_last_success_timestamp`) for Prometheus alerts.
-
-## Database users
-
-- `cloudcost_migrator`: owns the schema; used only by the `migrate` Job.
-- `cloudcost_app`: `SELECT/INSERT/UPDATE` on the tables; used by api and jobs.
-- The RDS master user is only for creating these two (documented in a runbook).
+The `cleanup` CronJob runs `DELETE FROM room WHERE expires_at < now()` every night (cascades to all child rows) and logs how many rooms were removed.
