@@ -1,4 +1,6 @@
-# EKS Platform Lab
+# EKS Platform Lab → CloudCost Watch
+
+> **This repository is becoming _CloudCost Watch_**, a FinOps platform on Amazon EKS. Start with [`CURRENT_STATE.md`](CURRENT_STATE.md) and [`PROJECT_REQUIREMENTS.md`](PROJECT_REQUIREMENTS.md); the plan is in [`TASKS.md`](TASKS.md). Coding agents: read [`PROMPT_FOR_CODING_AGENT.md`](PROMPT_FOR_CODING_AGENT.md). The text below describes the platform skeleton as it exists today.
 
 A containerized API on **Amazon EKS**, with every AWS resource defined in **Terraform** and deployed by **GitHub Actions over OIDC**. The goal is to learn what a production Kubernetes platform on AWS needs (networking, security, scaling and cost control) while keeping the lab cheap enough to run for a few hours and then destroy.
 
