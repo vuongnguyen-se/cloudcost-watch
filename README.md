@@ -8,6 +8,13 @@ A containerized API on **Amazon EKS**, with every AWS resource defined in **Terr
 
 ## Architecture
 
+![CloudCost Watch target architecture](docs/images/architecture.svg)
+
+_Target architecture of CloudCost Watch. Source: [`docs/images/make_architecture.py`](docs/images/make_architecture.py); details in [`ARCHITECTURE.md`](ARCHITECTURE.md)._
+
+<details>
+<summary>Platform skeleton as it exists today (Mermaid)</summary>
+
 ```mermaid
 flowchart LR
     Dev[GitHub Actions] -- OIDC, no keys --> IAM[IAM deploy role]
@@ -38,6 +45,8 @@ flowchart LR
     RDS -. password .-> SM[Secrets Manager]
     Budget[AWS Budgets] -. email .-> Owner((You))
 ```
+
+</details>
 
 | Layer | What | Why it is built this way |
 |---|---|---|

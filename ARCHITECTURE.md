@@ -2,6 +2,13 @@
 
 ## 1. High level
 
+![CloudCost Watch target architecture](docs/images/architecture.svg)
+
+_Edit [`docs/images/make_architecture.py`](docs/images/make_architecture.py) and run `python docs/images/make_architecture.py` to regenerate the SVG._
+
+<details>
+<summary>Same diagram as Mermaid (text version)</summary>
+
 ```mermaid
 flowchart LR
     User((User)) -->|HTTPS| R53[Route 53<br/>cost.vuongdomain.click]
@@ -38,6 +45,8 @@ flowchart LR
     ARGO -->|watches| Git[(GitHub repo)]
     GHA[GitHub Actions] -->|OIDC, push image| ECR[(ECR)]
 ```
+
+</details>
 
 **Request path:** browser → Route 53 → WAF → ALB (TLS ends here; ALB forces Cognito sign-in) → `frontend` pods for `/`, `api` pods for `/api/*` → PostgreSQL.
 

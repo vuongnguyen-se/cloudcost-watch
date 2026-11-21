@@ -1,0 +1,210 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 1010" width="1560" height="1010" role="img" aria-label="CloudCost Watch target architecture on AWS">
+<title>CloudCost Watch target architecture</title>
+<defs><style>
+text { font-family: 'Amazon Ember', 'Segoe UI', Helvetica, Arial, sans-serif; }
+.title { font-size: 26px; font-weight: 700; fill: #232F3E; }
+.subtitle { font-size: 14px; fill: #5F6B7A; }
+.glabel { font-size: 12px; font-weight: 700; fill: #fff; }
+.glyph { font-weight: 700; fill: #fff; text-anchor: middle; }
+.tlabel { font-size: 13px; font-weight: 600; fill: #232F3E; text-anchor: middle; }
+.tsub { font-size: 11px; fill: #5F6B7A; text-anchor: middle; }
+.pill { font-size: 12px; fill: #232F3E; }
+.section { font-size: 11px; font-weight: 700; fill: #5F6B7A; letter-spacing: .5px; text-transform: uppercase; }
+.tag { font-size: 11px; font-weight: 600; text-anchor: middle; }
+.step { font-size: 12px; font-weight: 700; fill: #fff; text-anchor: middle; }
+.legend-h { font-size: 12px; font-weight: 700; fill: #232F3E; }
+.legend { font-size: 12px; fill: #232F3E; }
+</style><marker id="a-0972D3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0972D3"/></marker><marker id="a-232F3E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#232F3E"/></marker><marker id="a-3F8624" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3F8624"/></marker><marker id="a-E07941" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#E07941"/></marker><marker id="a-ED7100" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ED7100"/></marker></defs>
+<rect width="1560" height="1010" rx="18" fill="#FFFFFF"/>
+<text x="40" y="48" class="title">CloudCost Watch</text>
+<text x="40" y="72" class="subtitle">Target architecture · FinOps platform on Amazon EKS · ap-southeast-1</text>
+<rect x="200" y="92" width="1220" height="838" rx="8" fill="none" stroke="#232F3E" stroke-width="1.6"/>
+<rect x="200" y="92" width="88.60000000000001" height="24" rx="6" fill="#232F3E"/>
+<text x="211" y="108.5" class="glabel">AWS Cloud</text>
+<rect x="220" y="132" width="1040" height="778" rx="8" fill="none" stroke="#00A4A6" stroke-width="1.6" stroke-dasharray="7 5"/>
+<rect x="220" y="132" width="177.4" height="24" rx="6" fill="#00A4A6"/>
+<text x="231" y="148.5" class="glabel">Region ap-southeast-1</text>
+<rect x="1272" y="300" width="136" height="172" rx="8" fill="none" stroke="#5F6B7A" stroke-width="1.6" stroke-dasharray="7 5"/>
+<rect x="1272" y="300" width="66.4" height="24" rx="6" fill="#5F6B7A"/>
+<text x="1283" y="316.5" class="glabel">Global</text>
+<rect x="240" y="272" width="830" height="578" rx="8" fill="#FBF9FF" stroke="#8C4FFF" stroke-width="1.6"/>
+<rect x="240" y="272" width="199.60000000000002" height="24" rx="6" fill="#8C4FFF"/>
+<text x="251" y="288.5" class="glabel">VPC 10.20.0.0/16 · 2 AZs</text>
+<rect x="258" y="312" width="174" height="520" rx="8" fill="#F3F8EA" stroke="#7AA116" stroke-width="1.6"/>
+<rect x="258" y="312" width="125.60000000000001" height="24" rx="6" fill="#7AA116"/>
+<text x="269" y="328.5" class="glabel">Public subnets</text>
+<rect x="450" y="312" width="440" height="520" rx="8" fill="#EEF6FC" stroke="#147EBA" stroke-width="1.6"/>
+<rect x="450" y="312" width="133.0" height="24" rx="6" fill="#147EBA"/>
+<text x="461" y="328.5" class="glabel">Private subnets</text>
+<rect x="470" y="340" width="400" height="464" rx="8" fill="#FFFFFF" stroke="#ED7100" stroke-width="1.6"/>
+<rect x="470" y="340" width="155.20000000000002" height="24" rx="6" fill="#ED7100"/>
+<text x="481" y="356.5" class="glabel">Amazon EKS cluster</text>
+<rect x="908" y="312" width="146" height="290" rx="8" fill="#FBF1FC" stroke="#C925D1" stroke-width="1.6"/>
+<rect x="908" y="312" width="140.4" height="24" rx="6" fill="#C925D1"/>
+<text x="919" y="328.5" class="glabel">Database subnets</text>
+<path d="M126,200 H262" fill="none" stroke="#0972D3" stroke-width="1.8" marker-end="url(#a-0972D3)"/>
+<path d="M316,200 H382" fill="none" stroke="#0972D3" stroke-width="1.8" marker-end="url(#a-0972D3)"/>
+<path d="M410,266 V430 H374" fill="none" stroke="#0972D3" stroke-width="1.8" marker-end="url(#a-0972D3)"/>
+<path d="M372,422 H512" fill="none" stroke="#0972D3" stroke-width="1.8" marker-end="url(#a-0972D3)"/>
+<path d="M374,436 Q440,436 440,410 V392 Q440,384 452,384 H700 V392" fill="none" stroke="#0972D3" stroke-width="1.8" marker-end="url(#a-0972D3)"/>
+<path d="M728,420 H952" fill="none" stroke="#0972D3" stroke-width="1.8" marker-end="url(#a-0972D3)"/>
+<path d="M540,526 V512" fill="none" stroke="#E07941" stroke-width="1.8"/>
+<path d="M660,526 V512" fill="none" stroke="#E07941" stroke-width="1.8"/>
+<path d="M780,526 V512" fill="none" stroke="#E07941" stroke-width="1.8"/>
+<path d="M540,512 H890 V428 H952" fill="none" stroke="#E07941" stroke-width="1.8" marker-end="url(#a-E07941)"/>
+<path d="M540,606 V618" fill="none" stroke="#E07941" stroke-width="1.8"/>
+<path d="M660,606 V618" fill="none" stroke="#E07941" stroke-width="1.8"/>
+<path d="M780,606 V618" fill="none" stroke="#E07941" stroke-width="1.8"/>
+<path d="M540,618 H1096" fill="none" stroke="#E07941" stroke-width="1.8"/>
+<path d="M1096,300 V646" fill="none" stroke="#E07941" stroke-width="1.8"/>
+<path d="M1096,312 H1130" fill="none" stroke="#E07941" stroke-width="1.8" marker-end="url(#a-E07941)"/>
+<path d="M1096,422 H1130" fill="none" stroke="#E07941" stroke-width="1.8" marker-end="url(#a-E07941)"/>
+<path d="M1096,532 H1130" fill="none" stroke="#E07941" stroke-width="1.8" marker-end="url(#a-E07941)"/>
+<path d="M1096,646 H1224 Q1236,646 1236,634 V410 Q1236,398 1248,398 H1310" fill="none" stroke="#E07941" stroke-width="1.8" marker-end="url(#a-E07941)"/>
+<path d="M1096,492 Q1110,492 1150,492 H1420 Q1430,492 1430,482 V458" fill="none" stroke="#E07941" stroke-width="1.8" stroke-dasharray="6 5" marker-end="url(#a-E07941)"/>
+<path d="M126,790 H170 V880 H1160 V812" fill="none" stroke="#3F8624" stroke-width="1.8" marker-end="url(#a-3F8624)"/>
+<path d="M580,880 V776" fill="none" stroke="#3F8624" stroke-width="1.8" stroke-dasharray="6 5" marker-end="url(#a-3F8624)"/>
+<path d="M1130,740 H874" fill="none" stroke="#ED7100" stroke-width="1.8" stroke-dasharray="6 5" marker-end="url(#a-ED7100)"/>
+<circle cx="100" cy="200" r="26.0" fill="#545B64"/>
+<text x="100" y="205.25" class="glyph" font-size="15">user</text>
+<text x="100" y="243.0" class="tlabel">Users</text>
+<text x="100" y="258.0" class="tsub">browser</text>
+<rect x="74.0" y="764.0" width="52" height="52" rx="10" fill="#24292F"/>
+<text x="100" y="794.2" class="glyph" font-size="12">GitHub</text>
+<text x="100" y="833.0" class="tlabel">GitHub</text>
+<text x="100" y="848.0" class="tsub">repo + Actions</text>
+<rect x="1434.0" y="406.0" width="52" height="52" rx="10" fill="#4A154B"/>
+<text x="1460" y="436.2" class="glyph" font-size="12">Slack</text>
+<text x="1460" y="475.0" class="tlabel">Slack</text>
+<text x="1460" y="490.0" class="tsub">optional</text>
+<rect x="264.0" y="174.0" width="52" height="52" rx="10" fill="#8C4FFF"/>
+<text x="290" y="205.25" class="glyph" font-size="15">R53</text>
+<text x="290" y="243.0" class="tlabel">Route 53</text>
+<text x="290" y="258.0" class="tsub">cost.vuongdomain.click</text>
+<rect x="384.0" y="174.0" width="52" height="52" rx="10" fill="#DD344C"/>
+<text x="410" y="205.25" class="glyph" font-size="15">WAF</text>
+<text x="410" y="243.0" class="tlabel">AWS WAF</text>
+<text x="410" y="258.0" class="tsub">managed rules</text>
+<rect x="514.0" y="174.0" width="52" height="52" rx="10" fill="#DD344C"/>
+<text x="540" y="205.25" class="glyph" font-size="15">ACM</text>
+<text x="540" y="243.0" class="tlabel">ACM</text>
+<text x="540" y="258.0" class="tsub">TLS certificate</text>
+<rect x="634.0" y="174.0" width="52" height="52" rx="10" fill="#DD344C"/>
+<text x="660" y="205.25" class="glyph" font-size="15">IdP</text>
+<text x="660" y="243.0" class="tlabel">Cognito</text>
+<text x="660" y="258.0" class="tsub">sign-in on ALB</text>
+<rect x="319.0" y="404.0" width="52" height="52" rx="10" fill="#8C4FFF"/>
+<text x="345" y="435.25" class="glyph" font-size="15">ALB</text>
+<text x="345" y="473.0" class="tlabel">Application LB</text>
+<text x="345" y="488.0" class="tsub">HTTPS · Cognito auth</text>
+<rect x="319.0" y="674.0" width="52" height="52" rx="10" fill="#8C4FFF"/>
+<text x="345" y="705.25" class="glyph" font-size="15">NAT</text>
+<text x="345" y="743.0" class="tlabel">NAT gateway</text>
+<text x="345" y="758.0" class="tsub">egress to AWS APIs</text>
+<rect x="514.0" y="394.0" width="52" height="52" rx="10" fill="#326CE5"/>
+<text x="540" y="425.25" class="glyph" font-size="15">web</text>
+<text x="540" y="463.0" class="tlabel">frontend</text>
+<text x="540" y="478.0" class="tsub">nginx · React</text>
+<rect x="674.0" y="394.0" width="52" height="52" rx="10" fill="#326CE5"/>
+<text x="700" y="425.25" class="glyph" font-size="15">api</text>
+<text x="700" y="463.0" class="tlabel">api</text>
+<text x="700" y="478.0" class="tsub">FastAPI · HPA 2–6</text>
+<rect x="514.0" y="526.0" width="52" height="52" rx="10" fill="#326CE5"/>
+<text x="540" y="557.25" class="glyph" font-size="15">job</text>
+<text x="540" y="595.0" class="tlabel">ingest</text>
+<text x="540" y="610.0" class="tsub">CronJob · daily</text>
+<rect x="634.0" y="526.0" width="52" height="52" rx="10" fill="#326CE5"/>
+<text x="660" y="557.25" class="glyph" font-size="15">job</text>
+<text x="660" y="595.0" class="tlabel">scan</text>
+<text x="660" y="610.0" class="tsub">CronJob · daily</text>
+<rect x="754.0" y="526.0" width="52" height="52" rx="10" fill="#326CE5"/>
+<text x="780" y="557.25" class="glyph" font-size="15">job</text>
+<text x="780" y="595.0" class="tlabel">notify</text>
+<text x="780" y="610.0" class="tsub">CronJob · hourly</text>
+<text x="490" y="660" class="section">Platform add-ons (Helm)</text>
+<rect x="490" y="674" width="176" height="28" rx="14" fill="#fff" stroke="#ED7100" stroke-width="1.4"/>
+<circle cx="506" cy="688" r="5" fill="#ED7100"/>
+<text x="518" y="692.5" class="pill">LB Controller</text>
+<rect x="676" y="674" width="176" height="28" rx="14" fill="#fff" stroke="#DD344C" stroke-width="1.4"/>
+<circle cx="692" cy="688" r="5" fill="#DD344C"/>
+<text x="704" y="692.5" class="pill">External Secrets</text>
+<rect x="490" y="714" width="176" height="28" rx="14" fill="#fff" stroke="#3F8624" stroke-width="1.4"/>
+<circle cx="506" cy="728" r="5" fill="#3F8624"/>
+<text x="518" y="732.5" class="pill">Argo CD (GitOps)</text>
+<rect x="676" y="714" width="176" height="28" rx="14" fill="#fff" stroke="#E7157B" stroke-width="1.4"/>
+<circle cx="692" cy="728" r="5" fill="#E7157B"/>
+<text x="704" y="732.5" class="pill">Prometheus · Grafana</text>
+<rect x="490" y="754" width="176" height="28" rx="14" fill="#fff" stroke="#326CE5" stroke-width="1.4"/>
+<circle cx="506" cy="768" r="5" fill="#326CE5"/>
+<text x="518" y="772.5" class="pill">metrics-server</text>
+<rect x="676" y="754" width="176" height="28" rx="14" fill="#fff" stroke="#326CE5" stroke-width="1.4"/>
+<circle cx="692" cy="768" r="5" fill="#326CE5"/>
+<text x="704" y="772.5" class="pill">Pod Identity agent</text>
+<rect x="954.0" y="394.0" width="52" height="52" rx="10" fill="#C925D1"/>
+<text x="980" y="425.25" class="glyph" font-size="15">RDS</text>
+<text x="980" y="463.0" class="tlabel">PostgreSQL 17</text>
+<text x="980" y="478.0" class="tsub">Multi-AZ in prod</text>
+<text x="981" y="500" class="tsub">encrypted · PITR</text>
+<text x="981" y="515" class="tsub">no internet route</text>
+<rect x="1134.0" y="286.0" width="52" height="52" rx="10" fill="#DD344C"/>
+<text x="1160" y="317.25" class="glyph" font-size="15">SM</text>
+<text x="1160" y="355.0" class="tlabel">Secrets Manager</text>
+<text x="1160" y="370.0" class="tsub">DB creds · webhook</text>
+<rect x="1134.0" y="396.0" width="52" height="52" rx="10" fill="#E7157B"/>
+<text x="1160" y="427.25" class="glyph" font-size="15">SES</text>
+<text x="1160" y="465.0" class="tlabel">Amazon SES</text>
+<text x="1160" y="480.0" class="tsub">email alerts</text>
+<rect x="1134.0" y="506.0" width="52" height="52" rx="10" fill="#E7157B"/>
+<text x="1160" y="537.25" class="glyph" font-size="15">CW</text>
+<text x="1160" y="575.0" class="tlabel">EC2 · ELB · CW</text>
+<text x="1160" y="590.0" class="tsub">scanned (read-only)</text>
+<rect x="1134.0" y="714.0" width="52" height="52" rx="10" fill="#ED7100"/>
+<text x="1160" y="745.25" class="glyph" font-size="15">ECR</text>
+<text x="1160" y="783.0" class="tlabel">Amazon ECR</text>
+<text x="1160" y="798.0" class="tsub">immutable SHA tags</text>
+<rect x="1314.0" y="372.0" width="52" height="52" rx="10" fill="#7AA116"/>
+<text x="1340" y="403.25" class="glyph" font-size="15">CE</text>
+<text x="1340" y="441.0" class="tlabel">Cost Explorer</text>
+<text x="1340" y="456.0" class="tsub">API (us-east-1)</text>
+<rect x="171.25" y="189" width="45.5" height="20" rx="10" fill="#fff" stroke="#0972D3" stroke-width="1"/>
+<text x="194" y="203.5" class="tag" fill="#0972D3">HTTPS</text>
+<rect x="459.85" y="411" width="20.3" height="20" rx="10" fill="#fff" stroke="#0972D3" stroke-width="1"/>
+<text x="470" y="425.5" class="tag" fill="#0972D3">/</text>
+<rect x="580.4" y="373" width="39.2" height="20" rx="10" fill="#fff" stroke="#0972D3" stroke-width="1"/>
+<text x="600" y="387.5" class="tag" fill="#0972D3">/api</text>
+<rect x="804.65" y="409" width="70.69999999999999" height="20" rx="10" fill="#fff" stroke="#0972D3" stroke-width="1"/>
+<text x="840" y="423.5" class="tag" fill="#0972D3">SQL · TLS</text>
+<rect x="794.1" y="501" width="51.8" height="20" rx="10" fill="#fff" stroke="#E07941" stroke-width="1"/>
+<text x="820" y="515.5" class="tag" fill="#E07941">upsert</text>
+<rect x="833.3" y="607" width="253.4" height="20" rx="10" fill="#fff" stroke="#E07941" stroke-width="1"/>
+<text x="960" y="621.5" class="tag" fill="#E07941">AWS API calls · Pod Identity · via NAT</text>
+<rect x="1242.05" y="481" width="95.89999999999999" height="20" rx="10" fill="#fff" stroke="#E07941" stroke-width="1"/>
+<text x="1290" y="495.5" class="tag" fill="#E07941">Slack webhook</text>
+<rect x="958.35" y="729" width="83.3" height="20" rx="10" fill="#fff" stroke="#ED7100" stroke-width="1"/>
+<text x="1000" y="743.5" class="tag" fill="#ED7100">pull images</text>
+<rect x="269.05" y="869" width="221.9" height="20" rx="10" fill="#fff" stroke="#3F8624" stroke-width="1"/>
+<text x="380" y="883.5" class="tag" fill="#3F8624">git push → CI → OIDC → push image</text>
+<rect x="610.55" y="851" width="158.9" height="20" rx="10" fill="#fff" stroke="#3F8624" stroke-width="1"/>
+<text x="690" y="865.5" class="tag" fill="#3F8624">Argo CD syncs manifests</text>
+<circle cx="150" cy="182" r="11" fill="#0972D3"/>
+<text x="150" y="186.5" class="step">1</text>
+<circle cx="426" cy="300" r="11" fill="#0972D3"/>
+<text x="426" y="304.5" class="step">2</text>
+<circle cx="470" cy="400" r="11" fill="#0972D3"/>
+<text x="470" y="404.5" class="step">3</text>
+<circle cx="800" cy="400" r="11" fill="#0972D3"/>
+<text x="800" y="404.5" class="step">4</text>
+<circle cx="600" cy="500" r="11" fill="#E07941"/>
+<text x="600" y="504.5" class="step">A</text>
+<circle cx="1096" cy="666" r="11" fill="#E07941"/>
+<text x="1096" y="670.5" class="step">B</text>
+<circle cx="230" cy="862" r="11" fill="#3F8624"/>
+<text x="230" y="866.5" class="step">C</text>
+<text x="40" y="966" class="legend-h">Flows</text>
+<path d="M100,962 H134" stroke="#0972D3" stroke-width="2.4" marker-end="url(#a-0972D3)"/>
+<text x="144" y="966" class="legend">1–4  Request: browser → Route 53 → WAF → ALB (TLS + Cognito) → pods → PostgreSQL</text>
+<path d="M708.0,962 H742.0" stroke="#E07941" stroke-width="2.4" marker-end="url(#a-E07941)"/>
+<text x="752.0" y="966" class="legend">A–B  Data jobs: import costs, scan for waste, send alerts</text>
+<path d="M1165.35,962 H1199.35" stroke="#3F8624" stroke-width="2.4" marker-end="url(#a-3F8624)"/>
+<text x="1209.35" y="966" class="legend">C  Delivery: GitHub Actions → ECR, Argo CD deploys from git</text>
+</svg>
